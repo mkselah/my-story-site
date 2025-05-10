@@ -4,7 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-export const handler = async (event, context) => {
+export async function handler(event, context) {
   try {
     const { topic, minutes, age, language } = JSON.parse(event.body);
 
@@ -15,6 +15,7 @@ export const handler = async (event, context) => {
       Reading aloud should take about ${minutes} minutes.
       Language: ${language}.
     `;
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
@@ -23,18 +24,18 @@ export const handler = async (event, context) => {
     });
 
     const story = completion.choices[0].message.content;
-    return new Response(
-      JSON.stringify({ story }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      }
-    );
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ story }),
+    };
   } catch (err) {
     console.error("Function error: ", err);
-    return new Response(
-      JSON.stringify({ error: err.message || "Unknown error" }),
-      { status: 500 }
-    );
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: err.message || "Unknown error" }),
+    };
   }
 }
