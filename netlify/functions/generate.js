@@ -10,6 +10,8 @@ export async function handler(event, context) {
 
     const prompt = `
       You are a children story teller.
+      religion is allowed and should be based on islam and its teachings if relevant.
+      Stories should be fun and educational.
       Write a story for a ${age}-year-old child.
       The topic is "${topic}".
       Reading aloud should take about ${minutes} minutes.
