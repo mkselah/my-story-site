@@ -1,71 +1,34 @@
-/* CommonJS is the simplest on Netlify;
-   no extra bundler flags needed. */
+import { OpenAI } from "openai";
 
-const { Configuration, OpenAIApi } = require("openai");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY      // DO **NOT** hard-code
+});
 
-/* ❶ Create OpenAI client */
-const openai = new OpenAIApi(
-  new Configuration({ apiKey: process.env.OPENAI_API_KEY })
-);
-
-/* ❷ Export a handler(event, context) */
-exports.handler = async (event, context) => {
-  /* Allow only POST */
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method not allowed" })
-    };
-  }
-
-  /* ❸ Parse and validate JSON body */
-  let payload;
+export default async (req, res) => {
   try {
-    payload = JSON.parse(event.body || "{}");
-  } catch {
-    return {
-      statusCode: 400,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Invalid JSON" })
-    };
-  }
+    // Netlify passes body as a string → parse JSON
+    const { topic, minutes, age, language } = JSON.parse(req.body);
 
-  const { topic, age, minutes } = payload;
-  if (!topic || !age || !minutes) {
-    return {
-      statusCode: 400,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Missing fields" })
-    };
-  }
+    const prompt = `
+      You are a children story teller.
+      Write a story for a ${age}-year-old child.
+      The topic is "${topic}".
+      Reading the story aloud should take about ${minutes} minutes.
+      Language: ${language}.
+    `;
 
-  /* ❹ Call OpenAI */
-  try {
-    const prompt = `Write an engaging bedtime story for a ${age}-year-old child about "${topic}". It should take about ${minutes} minutes to read. Use simple language and a positive tone.`;
-
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",   // or gpt-3.5-turbo to save $
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 600
+      temperature: 0.8,
+      max_tokens: 800
     });
 
-    const story = completion.data.choices[0].message.content.trim();
+    const story = completion.choices[0].message.content;
+    return res.status(200).json({ story });
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"     // CORS, useful for local dev
-      },
-      body: JSON.stringify({ story })
-    };
   } catch (err) {
-    console.error("OpenAI error:", err);
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "OpenAI request failed" })
-    };
+    console.error("Function error: ", err);
+    return res.status(500).json({ error: err.message });
   }
 };

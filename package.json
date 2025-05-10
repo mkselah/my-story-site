@@ -1,7 +1,8 @@
 {
-  "name": "bedtime-story-maker",
-  "license": "MIT",
+  "name": "my-story-site",
+  "version": "0.0.1",
+  "type": "module",
   "dependencies": {
-    "openai": "^4.0.0"
+    "openai": "^4.17.0"
   }
 }

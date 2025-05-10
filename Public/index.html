@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bedtime Story Generator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Bedtime Story Generator</h1>
+
+    <form id="storyForm">
+      <label>
+        Story topic<br />
+        <input required name="topic" placeholder="Dinosaurs under the sea">
+      </label>
+
+      <label>
+        Child's age<br />
+        <input required name="age" type="number" min="1" max="12" value="5">
+      </label>
+
+      <label>
+        Reading time (minutes)<br />
+        <input required name="minutes" type="number" min="1" max="30" value="3">
+      </label>
+
+      <label>
+        Language<br />
+        <select name="language">
+          <option>English</option>
+          <option>German</option>
+          <option>Dutch</option>
+          <option>Spanish</option>
+          <option>French</option>
+        </select>
+      </label>
+
+      <button id="generateBtn">Generate story</button>
+    </form>
+
+    <div id="loader" hidden>⏳ Generating…</div>
+    <article id="result"></article>
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
