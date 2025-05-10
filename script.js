@@ -12,7 +12,7 @@ form.addEventListener("submit", async (e) => {
   const data = Object.fromEntries(new FormData(form).entries());
 
   try {
-    const resp = await fetch("/.netlify/functions/generateStory", {
+    const resp = await fetch("/.netlify/functions/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
