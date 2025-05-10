@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bedtime Story Maker</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex flex-col items-center bg-purple-50 p-4">
+  <h1 class="text-3xl font-bold text-purple-700 mb-6">Bedtime Story Maker</h1>
+
+  <form id="storyForm" class="w-full max-w-md bg-white shadow-md rounded p-4 space-y-4">
+      <label class="block">
+        <span class="text-gray-700">Story topic / keywords</span>
+        <input name="topic" required class="mt-1 w-full border rounded p-2" placeholder="Dinosaurs, friendship,…" />
+      </label>
+
+      <label class="block">
+        <span class="text-gray-700">Child age</span>
+        <input name="age" type="number" min="0" required class="mt-1 w-full border rounded p-2" placeholder="4" />
+      </label>
+
+      <label class="block">
+        <span class="text-gray-700">Reading time (minutes)</span>
+        <input name="minutes" type="number" min="1" required class="mt-1 w-full border rounded p-2" placeholder="5" />
+      </label>
+
+      <button type="submit" class="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
+        Generate Story
+      </button>
+  </form>
+
+  <section id="output" class="max-w-md mt-6 prose"></section>
+
+<script>
+document.getElementById('storyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const output = document.getElementById('output');
+  output.innerHTML = "<p class='italic text-gray-500'>Generating…</p>";
+
+  const formData = new FormData(e.target);
+  const payload = {
+    topic: formData.get('topic'),
+    age: formData.get('age'),
+    minutes: formData.get('minutes')
+  };
+
+  try {
+    const res = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      output.innerHTML = `<h2 class="text-xl font-bold mb-4">Your Story</h2><p>${data.story.replace(/\n/g,'<br>')}</p>`;
+    } else {
+      output.innerHTML = `<p class="text-red-500">Error: ${data.error}</p>`;
+    }
+  } catch(err) {
+    output.innerHTML = `<p class="text-red-500">Network error. Try again.</p>`;
+  }
+});
+</script>
+</body>
+</html>
