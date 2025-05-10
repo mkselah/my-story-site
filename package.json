@@ -1,0 +1,7 @@
+{
+  "name": "bedtime-story-maker",
+  "license": "MIT",
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}
