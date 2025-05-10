@@ -4,9 +4,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-export default async (event, context) => {
+export const handler = async (event, context) => {
   try {
-    // Netlify (like AWS Lambda) passes a string as body:
     const { topic, minutes, age, language } = JSON.parse(event.body);
 
     const prompt = `
@@ -24,19 +23,18 @@ export default async (event, context) => {
     });
 
     const story = completion.choices[0].message.content;
-    // Netlify requires you return an object with statusCode and body
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ story }),
-      headers: {
-        "Content-Type": "application/json",
+    return new Response(
+      JSON.stringify({ story }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
       }
-    };
+    );
   } catch (err) {
     console.error("Function error: ", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message || "Unknown error" }),
-    };
+    return new Response(
+      JSON.stringify({ error: err.message || "Unknown error" }),
+      { status: 500 }
+    );
   }
-};
+}
