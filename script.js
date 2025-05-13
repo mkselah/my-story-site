@@ -27,3 +27,35 @@ form.addEventListener("submit", async (e) => {
     btn.disabled  = false;
   }
 });
+
+const listenBtn = document.getElementById('listen-btn');
+let currentUtterance = null;
+
+// Call this whenever you display a new story
+function enableListenButton(storyText) {
+  listenBtn.disabled = false;
+  listenBtn.onclick = () => {
+    // Stop any old speech
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    // Create and start new speech
+    const utterance = new SpeechSynthesisUtterance(storyText);
+    utterance.lang = detectLanguage(storyText);
+    currentUtterance = utterance;
+    speechSynthesis.speak(utterance);
+  };
+}
+
+// Optional: Try to pick the correct language for the story
+function detectLanguage(text) {
+  // Very basic demo: if there's æ, ø, å, assume Danish
+  if (/[æøåÆØÅ]/.test(text)) return 'da-DK';
+  else return 'en-US';
+}
+
+// When your code displays the story after fetching from API:
+function showStory(storyText) {
+  document.getElementById('story-container').innerText = storyText;
+  enableListenButton(storyText);
+}

@@ -30,6 +30,8 @@ export async function handler(event, context) {
 
     const story = completion.choices[0].message.content;
 
+    <button id="listen-btn" disabled>🔊 Lyt til historien</button>
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
