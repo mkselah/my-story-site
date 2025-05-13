@@ -6,6 +6,7 @@ const listenBtn = document.getElementById("listenBtn");
 
 let lastStory = '';
 let lastLang  = 'English';
+let currAudio = null;
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -13,6 +14,12 @@ form.addEventListener("submit", async (e) => {
   loader.hidden = false;
   btn.disabled  = true;
   listenBtn.hidden = true;
+  if (currAudio) {
+    currAudio.pause();
+    currAudio = null;
+  }
+  // Cancel browser synth if was reading
+  window.speechSynthesis.cancel();
 
   const data = Object.fromEntries(new FormData(form).entries());
   lastLang = data.language || 'English';
@@ -39,44 +46,57 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-listenBtn.addEventListener("click", () => {
+// Helper: get TTS audio and play it using AI voice!
+listenBtn.addEventListener("click", async () => {
   if (!lastStory) return;
-  // Optional: Stop reading if already talking
+  // Stop browser's built-in reading and old audio:
   window.speechSynthesis.cancel();
-
-   // Map languages to lang codes
-  const langMap = {
-    'English': 'en-US',
-    'Turkce': 'tr-TR',
-    'Dansk': 'da-DK',
-    'German': 'de-DE',
-    'Dutch': 'nl-NL',
-    'Spanish': 'es-ES',
-    'French': 'fr-FR'
-  };
-  const targetLang = langMap[lastLang] || 'en-US';
-  const utter = new SpeechSynthesisUtterance(lastStory);
-  utter.lang = targetLang;
-  utter.rate = 0.95;
-  utter.pitch = 1.1;
-  
-  // Wait for voices to be loaded, then pick the right one
-  function speakWithVoice() {
-    let voices = window.speechSynthesis.getVoices();
-    // Try to find the best matching voice
-    let voice = voices.find(v => v.lang.toLowerCase() === targetLang.toLowerCase());
-    // fallback: just a voice that starts with 'tr-' etc.
-    if (!voice) voice = voices.find(v => v.lang.toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
-    // fallback: first default voice
-    if (voice) utter.voice = voice;
-
-    window.speechSynthesis.speak(utter);
+  if (currAudio) {
+    currAudio.pause();
+    currAudio = null;
   }
+  listenBtn.disabled = true;
+  listenBtn.textContent = "🔄 Generating voice…";
+  try {
+    // Request TTS mp3 from Netlify function
+    const resp = await fetch("/.netlify/functions/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: lastStory, language: lastLang })
+    });
+    if (!resp.ok) throw new Error("TTS failed: " + (await resp.text()));
 
-  if (window.speechSynthesis.getVoices().length === 0) {
-    // some browsers, voices load async!
-    window.speechSynthesis.onvoiceschanged = speakWithVoice;
-  } else {
-    speakWithVoice();
+    // Get mp3 Base64 and play
+    const arrBuf = await resp.arrayBuffer();
+    const blob = new Blob([arrBuf], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+
+    currAudio = new Audio(url);
+    currAudio.onended = () => {
+      listenBtn.textContent = "🔊 Listen to story";
+      listenBtn.disabled = false;
+      URL.revokeObjectURL(url);
+    };
+    currAudio.onerror = () => {
+      listenBtn.textContent = "🔊 Listen to story";
+      listenBtn.disabled = false;
+      URL.revokeObjectURL(url);
+      alert("Audio playback error.");
+    };
+    currAudio.play();
+    listenBtn.textContent = "⏸️ Stop";
+    listenBtn.disabled = false;
+
+    // Allow user to click again to stop
+    listenBtn.onclick = () => {
+      currAudio.pause();
+      URL.revokeObjectURL(url);
+      listenBtn.textContent = "🔊 Listen to story";
+      listenBtn.onclick = arguments.callee;
+    };
+  } catch (err) {
+    alert("Voice reading failed: " + err.message);
+    listenBtn.textContent = "🔊 Listen to story";
+    listenBtn.disabled = false;
   }
 });
