@@ -5,7 +5,7 @@ const btn    = document.getElementById("generateBtn");
 const listenBtn = document.getElementById("listenBtn");
 
 let lastStory = '';
-let lastLang  = 'English';
+let lastLang  = 'Danish';
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -15,7 +15,7 @@ form.addEventListener("submit", async (e) => {
   listenBtn.hidden = true;
 
   const data = Object.fromEntries(new FormData(form).entries());
-  lastLang = data.language || 'English';
+  lastLang = data.language || 'Danish';
 
   try {
     const resp = await fetch("/.netlify/functions/generate", {
@@ -55,7 +55,7 @@ listenBtn.addEventListener("click", () => {
     'French': 'fr-FR'
   };
   const utter = new SpeechSynthesisUtterance(lastStory);
-  utter.lang = langMap[lastLang] || 'en-US';
+  utter.lang = langMap[lastLang] || 'da-DK';
   utter.rate = 0.95;    // Slightly slower/easier for kids
   utter.pitch = 1.1;    // Slight childlike tilt
   window.speechSynthesis.speak(utter);
