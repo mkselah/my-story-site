@@ -5,7 +5,7 @@ const btn    = document.getElementById("generateBtn");
 const listenBtn = document.getElementById("listenBtn");
 
 let lastStory = '';
-let lastLang  = 'Danish';
+let lastLang  = 'English';
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -15,7 +15,7 @@ form.addEventListener("submit", async (e) => {
   listenBtn.hidden = true;
 
   const data = Object.fromEntries(new FormData(form).entries());
-  lastLang = data.language || 'Danish';
+  lastLang = data.language || 'English';
 
   try {
     const resp = await fetch("/.netlify/functions/generate", {
@@ -44,7 +44,7 @@ listenBtn.addEventListener("click", () => {
   // Optional: Stop reading if already talking
   window.speechSynthesis.cancel();
 
-  // Pick language code for speech
+   // Map languages to lang codes
   const langMap = {
     'English': 'en-US',
     'Turkce': 'tr-TR',
@@ -54,9 +54,29 @@ listenBtn.addEventListener("click", () => {
     'Spanish': 'es-ES',
     'French': 'fr-FR'
   };
+  const targetLang = langMap[lastLang] || 'en-US';
   const utter = new SpeechSynthesisUtterance(lastStory);
-  utter.lang = langMap[lastLang] || 'da-DK';
-  utter.rate = 0.95;    // Slightly slower/easier for kids
-  utter.pitch = 1.1;    // Slight childlike tilt
-  window.speechSynthesis.speak(utter);
+  utter.lang = targetLang;
+  utter.rate = 0.95;
+  utter.pitch = 1.1;
+  
+  // Wait for voices to be loaded, then pick the right one
+  function speakWithVoice() {
+    let voices = window.speechSynthesis.getVoices();
+    // Try to find the best matching voice
+    let voice = voices.find(v => v.lang.toLowerCase() === targetLang.toLowerCase());
+    // fallback: just a voice that starts with 'tr-' etc.
+    if (!voice) voice = voices.find(v => v.lang.toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
+    // fallback: first default voice
+    if (voice) utter.voice = voice;
+
+    window.speechSynthesis.speak(utter);
+  }
+
+  if (window.speechSynthesis.getVoices().length === 0) {
+    // some browsers, voices load async!
+    window.speechSynthesis.onvoiceschanged = speakWithVoice;
+  } else {
+    speakWithVoice();
+  }
 });
