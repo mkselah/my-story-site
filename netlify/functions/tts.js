@@ -14,7 +14,7 @@ const LANGUAGE_VOICE_MAP = {
   'French': 'nova'
 };
 
-const MAX_TTS_CHARS = 3900;
+const MAX_TTS_CHARS = 3500;
 
 export async function handler(event, context) {
   try {

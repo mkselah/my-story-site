@@ -21,14 +21,14 @@ export async function handler(event, context) {
       The topic is "${topic}".
       Reading aloud should take about ${minutes} minutes.
       Language: ${language}.
-      story must be under 3850 characters.
+      story must be under 3400 characters.
     `;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      max_tokens: 1600,
+      max_tokens: 2500,
     });
 
     const story = completion.choices[0].message.content;
