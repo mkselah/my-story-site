@@ -50,6 +50,7 @@ export async function handler(event, context) {
         "Content-Type": "audio/mpeg",
         "Content-Disposition": "inline;filename=story.mp3"
       },
+      isBase64Encoded: true,
       body: buffer.toString('base64')
     };
   } catch (err) {
