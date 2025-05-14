@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bedtime Story Generator</title>
+  <title>Godnat historie</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="container">
-    <h1>Bedtime Story Generator</h1>
+    <h1>Godnat historie</h1>
 
     <form id="storyForm">
       <label>
-        Story topic<br />
-        <input required name="topic" placeholder="Dinosaurs under the sea">
+        Emne<br />
+        <input required name="topic" placeholder="Mickey mouse og Lion King" value="Mickey mouse og Lion King">
       </label>
 
       <label>
-        Child's age<br />
+        Barnets alder<br />
         <input required name="age" type="number" min="1" max="12" value="6">
       </label>
 
       <label>
-        Reading time (minutes)<br />
-        <input required name="minutes" type="number" min="1" max="10" value="3">
+        Læsetid i minutter<br />
+        <input required name="minutes" type="number" min="1" max="5" value="3">
       </label>
 
       <label>
@@ -32,19 +32,15 @@
           <option>Dansk</option>
           <option>Turkce</option>
           <option>English</option>
-          <option>German</option>
-          <option>Dutch</option>
-          <option>Spanish</option>
-          <option>French</option>
         </select>
       </label>
 
-      <button id="generateBtn">Generate story</button>
+      <button id="generateBtn">Ny historie</button>
     </form>
 
-    <div id="loader" hidden> Generating…</div>
+    <div id="loader" hidden> Skriver…</div>
     <article id="result"></article>
-    <button id="listenBtn" hidden>🔊 Listen to story</button>
+    <button id="listenBtn" hidden>🔊 Hør</button>
     <button id="downloadBtn" hidden>⬇️ Download mp3</button>
   </main>
 

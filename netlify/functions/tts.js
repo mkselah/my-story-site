@@ -14,6 +14,8 @@ const LANGUAGE_VOICE_MAP = {
   'French': 'nova'
 };
 
+const MAX_TTS_CHARS = 3900;
+
 export async function handler(event, context) {
   try {
     const { text, language } = JSON.parse(event.body);
@@ -25,6 +27,9 @@ export async function handler(event, context) {
       };
     }
 
+    // only send part that fits in one call
+    const part = text.slice(0, MAX_TTS_CHARS);
+
     // Pick a voice
     const voice = LANGUAGE_VOICE_MAP[language] || 'onyx';
 
@@ -33,7 +38,7 @@ export async function handler(event, context) {
       voice,
       input: text,
       response_format: "mp3",
-      speed: 1.0  // Optionally set to 0.9 for slower for kids
+      speed: 0.9  // Optionally set to 0.9 for slower for kids
     });
 
     // response is a stream!
