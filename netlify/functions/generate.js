@@ -1,4 +1,3 @@
-
 import fetch from "node-fetch";
 import { OpenAI } from 'openai';
 
@@ -8,27 +7,30 @@ const openai = new OpenAI({
 
 export async function handler(event, context) {
   try {
-    const { topic, minutes, age, language } = JSON.parse(event.body);
+    const { topic, minutes, age, language, readYourself } = JSON.parse(event.body);
+
+    // Char limit for each mode
+    const charLimit = readYourself ? 10000 : 3400;
 
     const prompt = `
       You are a children story teller.
-      Dont mention that you are ai nor a robot. 
+      Dont mention that you are ai nor a robot.
       Dont summarize the instructions and say i will write a story etc, just do it.
       Stories should be fun and educational.
-      stories should be interesting and imaginative, as stories are told without pictures.
-      use a random storytelling style based of one of 10 most popular children storytelling styles.
+      Stories should be interesting and imaginative, as stories are told without pictures.
+      Use a random storytelling style based of one of 10 most popular children storytelling styles.
       Write a story for a ${age}-year-old child.
       The topic is "${topic}".
       Reading aloud should take about ${minutes} minutes.
       Language: ${language}.
-      story must be under 3400 characters.
+      Story must be under ${charLimit} characters.
     `;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: readYourself ? 3500 : 2500,
     });
 
     const story = completion.choices[0].message.content;

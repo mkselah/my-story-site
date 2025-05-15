@@ -3,45 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Godnathistorier</title>
+  <title>Bedtime Story Generator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="container">
-    <h1>Godnathistorier</h1>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+      <button id="listenPageBtn" class="pageBtn activeBtn">Listen</button>
+      <button id="readPageBtn" class="pageBtn">Read yourself</button>
+    </div>
 
-    <form id="storyForm">
-      <label>
-        Emne<br />
-        <input required name="topic" placeholder="Mickey mouse og Lion King" value="Mickey mouse og Lion King">
-      </label>
+    <!-- Listen mode section -->
+    <section id="listenSection">
+      <form id="storyForm">
+        <label>
+          Story topic<br />
+          <input required name="topic" placeholder="Dinosaurs under the sea">
+        </label>
+        <label>
+          Child's age<br />
+          <input required name="age" type="number" min="1" max="12" value="5">
+        </label>
+        <label>
+          Reading time (minutes)<br />
+          <input required name="minutes" type="number" min="1" max="30" value="3">
+        </label>
+        <label>
+          Language<br />
+          <select name="language">
+            <option>Dansk</option>
+            <option>Turkce</option>
+            <option>English</option>
+          </select>
+        </label>
+        <button id="generateBtn">Generate story</button>
+      </form>
+      <div id="loader" hidden>Generating…</div>
+      <article id="result"></article>
+      <button id="listenBtn" hidden>🔊 Listen to story</button>
+      <button id="downloadBtn" hidden>⬇️ Download mp3</button>
+    </section>
 
-      <label>
-        Barnets alder<br />
-        <input required name="age" type="number" min="1" max="12" value="6">
-      </label>
-
-      <label>
-        Læsetid i minutter<br />
-        <input required name="minutes" type="number" min="1" max="5" value="3">
-      </label>
-
-      <label>
-        Language<br />
-        <select name="language">
-          <option>Dansk</option>
-          <option>Turkce</option>
-          <option>English</option>
-        </select>
-      </label>
-
-      <button id="generateBtn">Ny historie</button>
-    </form>
-
-    <div id="loader" hidden> Skriver…</div>
-    <article id="result"></article>
-    <button id="listenBtn" hidden>🔊 Hør</button>
-    <button id="downloadBtn" hidden>⬇️ Download mp3</button>
+    <!-- Read yourself section -->
+    <section id="readSection" hidden>
+      <form id="readForm">
+        <label>
+          Story topic<br />
+          <input required name="topic" placeholder="Princess in a spaceship">
+        </label>
+        <label>
+          Child's age<br />
+          <input required name="age" type="number" min="1" max="12" value="5">
+        </label>
+        <label>
+          Reading time (minutes) (may be ignored if very long story wanted)<br />
+          <input required name="minutes" type="number" min="1" max="60" value="8">
+        </label>
+        <label>
+          Language<br />
+          <select name="language">
+            <option>Dansk</option>
+            <option>Turkce</option>
+            <option>English</option>
+          </select>
+        </label>
+        <button id="readGenerateBtn">Generate story</button>
+      </form>
+      <div id="readLoader" hidden>Generating…</div>
+      <article id="readResult"></article>
+    </section>
   </main>
 
   <script src="script.js" defer></script>
