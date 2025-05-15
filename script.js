@@ -22,7 +22,7 @@ listenPageBtn.addEventListener("click", () => setMode("listen"));
 readPageBtn.addEventListener("click", () => setMode("read"));
 setMode("listen"); // default
 
-// EXISTING Listen mode code — unchanged except for isolation in Listen section!
+// EXISTING Listen mode code – now with fixed Listen button logic!
 
 const form   = document.getElementById("storyForm");
 const loader = document.getElementById("loader");
@@ -35,6 +35,7 @@ let lastStory = '';
 let lastLang  = 'English';
 let currAudio = null;
 let lastMp3BlobUrl = null;
+let isPlaying = false; // CHANGED
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -46,6 +47,7 @@ form.addEventListener("submit", async (e) => {
   if (currAudio) {
     currAudio.pause();
     currAudio = null;
+    isPlaying = false; // CHANGED
   }
   window.speechSynthesis.cancel();
 
@@ -77,10 +79,20 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-// TTS and Download code remain identical
-
+// --------- Listen Button TTS — CLEANED UP --------- //
 listenBtn.addEventListener("click", async () => {
   if (!lastStory) return;
+
+  // If audio is playing, stop it
+  if (isPlaying && currAudio) {
+    currAudio.pause();
+    currAudio = null;
+    isPlaying = false;
+    listenBtn.textContent = " Listen to story";
+    return;
+  }
+
+  // Not playing: generate and play
   window.speechSynthesis.cancel();
   if (currAudio) {
     currAudio.pause();
@@ -103,41 +115,24 @@ listenBtn.addEventListener("click", async () => {
 
     currAudio = new Audio(url);
     currAudio.onended = () => {
+      isPlaying = false;
       listenBtn.textContent = " Listen to story";
-      listenBtn.disabled = false;
     };
     currAudio.onerror = () => {
+      isPlaying = false;
       listenBtn.textContent = " Listen to story";
-      listenBtn.disabled = false;
       alert("Audio playback error.");
     };
     currAudio.play();
+    isPlaying = true;
     listenBtn.textContent = " Stop";
-    listenBtn.disabled = false;
-    listenBtn.onclick = () => {
-      currAudio.pause();
-      listenBtn.textContent = " Listen to story";
-      listenBtn.onclick = listenHandler;
-    };
   } catch (err) {
     alert("Voice reading failed: " + err.message);
     listenBtn.textContent = " Listen to story";
+  } finally {
     listenBtn.disabled = false;
   }
 });
-
-function listenHandler() {
-  listenBtn.removeEventListener("click", listenHandler);
-  listenBtn.addEventListener("click", listenClickHandler);
-  listenClickHandler();
-}
-
-function listenClickHandler() {
-  listenBtn.removeEventListener("click", listenClickHandler);
-  listenBtn.addEventListener("click", listenHandler);
-  listenBtn.dispatchEvent(new Event("click"));
-}
-listenBtn.addEventListener("click", listenClickHandler);
 
 downloadBtn.addEventListener("click", async () => {
   if (lastMp3BlobUrl) {
